@@ -4,3 +4,4 @@ C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\bin\Debug\Logger.pdb
 C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Logger.csproj.CoreCompileInputs.cache
 C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Logger.exe
 C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Logger.pdb
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Logger.csprojAssemblyReference.cache
