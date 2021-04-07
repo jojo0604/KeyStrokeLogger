@@ -1,0 +1,7 @@
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\bin\Debug\Autocorrect.exe.config
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\bin\Debug\Autocorrect.exe
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\bin\Debug\Autocorrect.pdb
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Autocorrect.csprojAssemblyReference.cache
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Autocorrect.csproj.CoreCompileInputs.cache
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Autocorrect.exe
+C:\Users\jojo0604\source\repos\Autocorrect\Autocorrect\obj\Debug\Autocorrect.pdb
